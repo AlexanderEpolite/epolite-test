@@ -89,6 +89,12 @@ button {
 .encryption, .decryption, .signing, .verification {
     margin-top: 20px;
 }
+
+@media screen and (max-width: 600px) {
+    .keys {
+        flex-direction: column;
+    }
+}
 </style>
 
 <script lang="ts">
