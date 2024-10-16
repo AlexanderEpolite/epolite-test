@@ -1,11 +1,15 @@
 <script lang="ts" setup>
-
 import { createKeyPair, sign, verify, encrypt, decrypt } from "epolite";
 import { defineComponent } from "vue";
 </script>
 
 <template>
     <h1>Test EPOLITE Encryption</h1>
+    <p>
+        Note: algorithms used are post-quantum, but I haven't audited them yet.
+        <br>
+        See the library used <a href="https://npmjs.com/epolite">here</a> for more info.
+    </p>
     <div class="keys">
         <div class="input-section">
             <h2>Input Public Key</h2>
@@ -47,7 +51,7 @@ import { defineComponent } from "vue";
             <textarea readonly v-model="signatureBase64"></textarea>
         </div>
     </div>
-
+    
     <div class="verification">
         <div class="input-section">
             <h2>Verify Signature</h2>
@@ -86,7 +90,10 @@ button {
     padding: 10px 20px;
 }
 
-.encryption, .decryption, .signing, .verification {
+.encryption,
+.decryption,
+.signing,
+.verification {
     margin-top: 20px;
 }
 
