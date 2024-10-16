@@ -26,6 +26,7 @@ import { defineComponent } from "vue";
         <div class="input-section">
             <h2>Encrypt Message</h2>
             <textarea placeholder="Plaintext" v-model="plaintextToEncrypt"></textarea>
+            <br>
             <button @click="encryptMessage">Encrypt</button>
             <h3>Encrypted Message (Base64):</h3>
             <textarea readonly v-model="encryptedBase64"></textarea>
@@ -36,6 +37,7 @@ import { defineComponent } from "vue";
         <div class="input-section">
             <h2>Decrypt Message</h2>
             <textarea placeholder="Encrypted Base64" v-model="encryptedBase64ToDecrypt"></textarea>
+            <br>
             <button @click="decryptMessage">Decrypt</button>
             <h3>Decrypted Plaintext:</h3>
             <textarea readonly v-model="decryptedPlaintext"></textarea>
@@ -46,6 +48,7 @@ import { defineComponent } from "vue";
         <div class="input-section">
             <h2>Sign Message</h2>
             <textarea placeholder="Message" v-model="messageToSign"></textarea>
+            <br>
             <button @click="signMessage">Sign</button>
             <h3>Signature (Base64):</h3>
             <textarea readonly v-model="signatureBase64"></textarea>
@@ -57,6 +60,7 @@ import { defineComponent } from "vue";
             <h2>Verify Signature</h2>
             <textarea placeholder="Original Message" v-model="originalMessageToVerify"></textarea>
             <textarea placeholder="Signature (Base64)" v-model="signatureBase64ToVerify"></textarea>
+            <br>
             <button @click="verifySignature">Verify</button>
             <h3>Verification Result:</h3>
             <p>{{ verificationResult }}</p>
