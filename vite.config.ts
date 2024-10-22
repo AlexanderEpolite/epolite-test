@@ -8,6 +8,7 @@ export default defineConfig({
     noExternal: ['@dashlane/pqc-sign-falcon-512-node'],
   },
   build: {
+    outDir: "./docs/",
     rollupOptions: {
       external: ['fs', 'path', 'module', 'crypto'],
     },

@@ -57,8 +57,7 @@ import { defineComponent } from "vue";
     
     <div class="verification">
         <div class="input-section">
-            <h2>Verify Signature</h2>
-            <textarea placeholder="Original Message" v-model="originalMessageToVerify"></textarea>
+            <h2>Verify Message</h2>
             <textarea placeholder="Signature (Base64)" v-model="signatureBase64ToVerify"></textarea>
             <br>
             <button @click="verifySignature">Verify</button>
@@ -121,7 +120,6 @@ export default defineComponent({
             decryptedPlaintext: "",
             messageToSign: "",
             signatureBase64: "",
-            originalMessageToVerify: "",
             signatureBase64ToVerify: "",
             verificationResult: "",
         };
@@ -132,6 +130,7 @@ export default defineComponent({
                 const confirmOverwrite = confirm("Current keys will be overwritten. Continue?");
                 if (!confirmOverwrite) return;
             }
+            
             try {
                 const kp = await createKeyPair();
                 this.publicKey = kp.publicKey;
@@ -145,10 +144,12 @@ export default defineComponent({
                 alert("Public key is required for encryption.");
                 return;
             }
+            
             if (!this.plaintextToEncrypt) {
                 alert("Please enter plaintext to encrypt.");
                 return;
             }
+            
             try {
                 this.encryptedBase64 = await encrypt(this.plaintextToEncrypt, this.publicKey);
             } catch (error: any) {
@@ -160,10 +161,12 @@ export default defineComponent({
                 alert("Private key is required for decryption.");
                 return;
             }
+            
             if (!this.encryptedBase64ToDecrypt) {
                 alert("Please enter encrypted base64 data to decrypt.");
                 return;
             }
+            
             try {
                 this.decryptedPlaintext = await decrypt(this.encryptedBase64ToDecrypt, this.privateKey);
             } catch (error: any) {
@@ -175,10 +178,12 @@ export default defineComponent({
                 alert("Private key is required for signing.");
                 return;
             }
+            
             if (!this.messageToSign) {
                 alert("Please enter a message to sign.");
                 return;
             }
+            
             try {
                 this.signatureBase64 = await sign(this.messageToSign, this.privateKey);
             } catch (error: any) {
@@ -190,17 +195,14 @@ export default defineComponent({
                 alert("Public key is required for verification.");
                 return;
             }
-            if (!this.originalMessageToVerify) {
-                alert("Please enter the original message to verify.");
-                return;
-            }
+            
             if (!this.signatureBase64ToVerify) {
                 alert("Please enter a signature (base64) to verify.");
                 return;
             }
+            
             try {
                 const isValid = await verify(
-                    this.originalMessageToVerify,
                     this.signatureBase64ToVerify,
                     this.publicKey
                 );
