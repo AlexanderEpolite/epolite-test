@@ -65,6 +65,26 @@ import { defineComponent } from "vue";
             <p>{{ verificationResult }}</p>
         </div>
     </div>
+
+    <!-- File Encryption Section -->
+    <div class="file-encryption">
+        <h2>Encrypt File</h2>
+        <input type="file" @change="onFileSelectEncrypt">
+        <br>
+        <button @click="encryptFile">Encrypt File</button>
+        <br>
+        <a v-if="encryptedFileUrl" :href="encryptedFileUrl" :download="encryptedFileName || 'encrypted_file.epl'">Download Encrypted File</a>
+    </div>
+
+    <!-- File Decryption Section -->
+    <div class="file-decryption">
+        <h2>Decrypt File</h2>
+        <input type="file" @change="onFileSelectDecrypt">
+        <br>
+        <button @click="decryptFile">Decrypt File</button>
+        <br>
+        <a v-if="decryptedFileUrl" :href="decryptedFileUrl" :download="decryptedFileName">Download Decrypted File</a>
+    </div>
 </template>
 
 <style>
@@ -96,8 +116,14 @@ button {
 .encryption,
 .decryption,
 .signing,
-.verification {
+.verification,
+.file-encryption,
+.file-decryption {
     margin-top: 20px;
+}
+
+.file-decryption {
+    margin-bottom: 50px;
 }
 
 @media screen and (max-width: 600px) {
@@ -122,6 +148,13 @@ export default defineComponent({
             signatureBase64: "",
             signatureBase64ToVerify: "",
             verificationResult: "",
+            
+            fileToEncrypt: null as File | null,
+            encryptedFileUrl: "",
+            fileToDecrypt: null as File | null,
+            decryptedFileUrl: "",
+            decryptedFileName: "",
+            encryptedFileName: "",
         };
     },
     methods: {
@@ -206,10 +239,105 @@ export default defineComponent({
                     this.signatureBase64ToVerify,
                     this.publicKey
                 );
-                this.verificationResult = isValid ? "Signature is valid." : "Signature is invalid.";
+                this.verificationResult = isValid ? "Signature is valid." : "Signature is NOT valid.";
             } catch (error: any) {
                 alert("Verification failed: " + (error?.message || error));
             }
+        },
+        onFileSelectEncrypt(event: Event) {
+            const input = event.target as HTMLInputElement;
+            this.fileToEncrypt = input.files ? input.files[0] : null;
+            this.encryptedFileName = this.fileToEncrypt?.name + '.epl';
+        },
+        async encryptFile() {
+            if (!this.publicKey) {
+                alert("Public key is required for encryption.");
+                return;
+            }
+            
+            if (!this.fileToEncrypt) {
+                alert("Please select a file to encrypt.");
+                return;
+            }
+            
+            try {
+                const fileReader = new FileReader();
+                
+                fileReader.onload = async (e) => {
+                    const arrayBuffer = e.target?.result as ArrayBuffer;
+                    
+                    const base64Data = this.arrayBufferToBase64(arrayBuffer);
+                    const encryptedData = await encrypt(base64Data, this.publicKey);
+                    
+                    const encryptedBlob = new Blob([encryptedData], { type: "text/plain;charset=utf-8" });
+                    this.encryptedFileUrl = URL.createObjectURL(encryptedBlob);
+                };
+                
+                fileReader.readAsArrayBuffer(this.fileToEncrypt);
+                
+            } catch (error: any) {
+                alert("File encryption failed: " + (error?.message || error));
+            }
+        },
+        onFileSelectDecrypt(event: Event) {
+            const input = event.target as HTMLInputElement;
+            this.fileToDecrypt = input.files ? input.files[0] : null;
+        },
+        async decryptFile() {
+            if(!this.privateKey) {
+                alert("Private key is required for decryption.");
+                return;
+            }
+            
+            if(!this.fileToDecrypt) {
+                alert("Please select an encrypted file (.epl) to decrypt.");
+                return;
+            }
+            
+            try {
+                const fileReader = new FileReader();
+                
+                fileReader.onload = async (e: any) => {
+                    const encryptedData = e.target.result;
+                    
+                    const decryptedBase64Data = await decrypt(encryptedData, this.privateKey);
+                    const decryptedArrayBuffer = this.base64ToArrayBuffer(decryptedBase64Data);
+                    const decryptedBlob = new Blob([decryptedArrayBuffer], { type: "application/octet-stream" });
+                    
+                    const originalFileName = this.fileToDecrypt?.name.replace(/\.epl$/, '') || 'decrypted_file';
+                    this.decryptedFileName = originalFileName;
+                    
+                    this.decryptedFileUrl = URL.createObjectURL(decryptedBlob);
+                };
+                
+                fileReader.readAsText(this.fileToDecrypt, 'utf-8');
+            } catch (error: any) {
+                alert("File decryption failed: " + (error?.message || error));
+            }
+        },
+        arrayBufferToBase64(buffer: ArrayBuffer) {
+            let binary = '';
+            
+            const bytes = new Uint8Array(buffer);
+            const len = bytes.byteLength;
+            
+            for(let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            
+            return btoa(binary);
+        },
+        base64ToArrayBuffer(base64: string) {
+            const binaryString = atob(base64);
+            
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            
+            for(let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            
+            return bytes.buffer;
         },
     },
 });
